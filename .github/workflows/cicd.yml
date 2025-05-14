@@ -27,10 +27,28 @@ jobs:
   deploy:
     needs: build
     runs-on: [aws-ec2]
+    env:
+      DATABASE_URL: ${{secrets.DB_URL}}
+      DATABASE_USERNAME: ${{secrets.DB_USERNAME}}
+      DATABASE_PASSWORD: ${{secrets.DB_PASSWORD}}
+      DATABASE_DIALECT: ${{secrets.DB_PASSWORD}}
+      JWT_SECRET: ${{secrets.JWT_SECRET}}
+      FRONTEND_URL: ${{secrets.FRONTEND_URL}}
     steps:
       - name: Pull Image from docker hub
         run: docker pull mzlmyo/snapshort-backend:latest
       - name: Delete old container
         run: docker rm -f snapshort-backend-container
-      - name: Run docker container
-        run: docker run -d -p 8080:8080 --name snapshort-backend-container mzlmyo/snapshort-backend
+      - name: Run docker container with env-vars
+        run: |
+          docker run -d \
+            -p 8080:8080 \
+            --name snapshort-backend-container
+            -e SPRING_DATASOURCE_URL=$DATABASE_URL \
+            -e SPRING_DATASOURCE_USERNAME=$DATABASE_USERNAME \
+            -e SPRING_DATASOURCE_PASSWORD=$DATABASE_PASSWORD \
+            -e JWT_SECRET=$JWT_SECRET
+            -e FRONTEND_URL=$FRONTEND_URL
+            mzlmyo/snapshort-backend:latest
+
+        #run: docker run -d -p 8080:8080 --name snapshort-backend-container mzlmyo/snapshort-backend
