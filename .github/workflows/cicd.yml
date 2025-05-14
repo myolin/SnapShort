@@ -1,0 +1,36 @@
+name: CICD
+
+on:
+  push:
+    branches: [deploy]
+
+jobs:
+  build:
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Build Project
+        run: mvn clean install -DskipTests
+      - name: Login to docker hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+      - name: Build docker image
+        run: docker build -t mzlmyo/snapshort-backend .
+      - name: Publish image to docker hub
+        run: docker push mzlmyo/snapshort-backend:latest
+
+  deploy:
+    needs: build
+    runs-on: [aws-ec2]
+    steps:
+      - name: Pull Image from docker hub
+        run: docker pull mzlmyo/snapshort-backend:latest
+      - name: Delete old container
+        run: docker rm -f snapshort-backend-container
+      - name: Run docker container
+        run: docker run -d -p 8080:8080 --name snapshort-backend-container mzlmyo/snapshort-backend
