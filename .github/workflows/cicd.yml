@@ -43,12 +43,12 @@ jobs:
         run: |
           docker run -d \
             -p 8080:8080 \
-            --name snapshort-backend-container
+            --name snapshort-backend-container \
             -e SPRING_DATASOURCE_URL=$DATABASE_URL \
             -e SPRING_DATASOURCE_USERNAME=$DATABASE_USERNAME \
             -e SPRING_DATASOURCE_PASSWORD=$DATABASE_PASSWORD \
-            -e JWT_SECRET=$JWT_SECRET
-            -e FRONTEND_URL=$FRONTEND_URL
+            -e JWT_SECRET=$JWT_SECRET \
+            -e FRONTEND_URL=$FRONTEND_URL \
             mzlmyo/snapshort-backend:latest
 
         #run: docker run -d -p 8080:8080 --name snapshort-backend-container mzlmyo/snapshort-backend
